@@ -1,8 +1,11 @@
-import { defaultAbiCoder } from '@ethersproject/abi';
-import { verifyTypedData } from '@ethersproject/wallet';
-import { hexConcat } from '@ethersproject/bytes';
-import { keccak_256 } from 'js-sha3';
-export class Address {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.verifyTypedDataV4 = exports.chainMethod = exports.EventType = exports.EventFilter = exports.CallData = exports.T = exports.BlockHash = exports.TxHash = exports.Address = void 0;
+const abi_1 = require("@ethersproject/abi");
+const wallet_1 = require("@ethersproject/wallet");
+const bytes_1 = require("@ethersproject/bytes");
+const js_sha3_1 = require("js-sha3");
+class Address {
     constructor(string) {
         this.string = string;
     }
@@ -14,17 +17,20 @@ export class Address {
         return this.string.substring(0, 6) + '...' + this.string.substring(36);
     }
 }
-export class TxHash {
+exports.Address = Address;
+class TxHash {
     constructor(txHash) {
         this.txHash = txHash;
     }
 }
-export class BlockHash {
+exports.TxHash = TxHash;
+class BlockHash {
     constructor(blockHash) {
         this.blockHash = blockHash;
     }
 }
-export const T = {
+exports.BlockHash = BlockHash;
+exports.T = {
     address: 'address',
     addressArray: 'address[]',
     uint256Array: 'uint256[]',
@@ -64,28 +70,30 @@ const Decoder = {
         throw new Error(`Unknown boolean: ${val}`);
     },
 };
-export class CallData {
+class CallData {
     constructor(data, expectedResultType) {
         this.data = data;
         this.expectedResultType = expectedResultType;
     }
 }
-export class EventFilter {
+exports.CallData = CallData;
+class EventFilter {
     constructor(topics, params, index) {
         this.topics = topics;
         this.params = params;
         this.index = index;
     }
 }
+exports.EventFilter = EventFilter;
 function buildCompactCallName(name, argTypes) {
     return `${name}(${argTypes.join(',')})`;
 }
 function callSig(name) {
-    return '0x' + keccak_256(name).substring(0, 8);
+    return '0x' + js_sha3_1.keccak_256(name).substring(0, 8);
 }
 function eventSig(name, argTypes) {
     const n = `${name}(${argTypes.join(',')})`;
-    return '0x' + keccak_256(n);
+    return '0x' + js_sha3_1.keccak_256(n);
 }
 function assertString(val, forField) {
     if (typeof val === 'string')
@@ -109,9 +117,9 @@ function encodeArgData(argTypes, arg) {
         typesArray.push(t);
         valuesArray.push(encode(arg[k], t));
     });
-    return defaultAbiCoder.encode(typesArray, valuesArray);
+    return abi_1.defaultAbiCoder.encode(typesArray, valuesArray);
 }
-export function EventType(name, params, index) {
+function EventType(name, params, index) {
     let topic0 = null;
     return function (filter) {
         topic0 = topic0 || eventSig(name, Object.keys(params).map(k => params[k]));
@@ -122,20 +130,22 @@ export function EventType(name, params, index) {
                 throw new Error(`Cannot filter on "${k}" as it is not an indexed event parameter.`);
             const t = params[k];
             const v = encode(filter[k], t);
-            retValue[indexPos + 1] = defaultAbiCoder.encode([t], [v]);
+            retValue[indexPos + 1] = abi_1.defaultAbiCoder.encode([t], [v]);
         });
         return new EventFilter(retValue, params, index);
     };
 }
-export function chainMethod(methodName, argTypes, resultType) {
+exports.EventType = EventType;
+function chainMethod(methodName, argTypes, resultType) {
     let sig = null;
     return function getCallData(arg) {
         sig = sig || callSig(buildCompactCallName(methodName, Object.keys(argTypes).map(n => assertString(argTypes[n], `argTypes[${n}] in ${methodName} definition`))));
         const argData = encodeArgData(argTypes, arg);
-        const allData = hexConcat([sig, argData]);
+        const allData = bytes_1.hexConcat([sig, argData]);
         return new CallData(allData, resultType);
     };
 }
+exports.chainMethod = chainMethod;
 function decodeValue(val, type) {
     if (val.toBigInt) {
         return val.toBigInt();
@@ -154,7 +164,7 @@ function decodeObject(returnTypeObject, dataString) {
         typesArray.push(v);
         repsonseKeys.push(k);
     });
-    const rObj = defaultAbiCoder.decode(typesArray, dataString);
+    const rObj = abi_1.defaultAbiCoder.decode(typesArray, dataString);
     const retValue = {};
     rObj.forEach((item, index) => {
         const t = typesArray[index];
@@ -186,8 +196,8 @@ function toJson(obj) {
         return obj;
     throw new Error('could not encode');
 }
-export function verifyTypedDataV4(domain, types, value, signature) {
-    const addr = verifyTypedData({
+function verifyTypedDataV4(domain, types, value, signature) {
+    const addr = wallet_1.verifyTypedData({
         name: domain.name,
         version: domain.version,
         chainId: domain.chainId,
@@ -195,7 +205,8 @@ export function verifyTypedDataV4(domain, types, value, signature) {
     }, types, value, signature);
     return new Address(addr);
 }
-export default class Chain {
+exports.verifyTypedDataV4 = verifyTypedDataV4;
+class Chain {
     constructor(provider) {
         this.provider = provider;
         if (!provider)
@@ -281,7 +292,7 @@ export default class Chain {
                 return event.index.indexOf(k) === -1;
             });
             const dataTypesArray = dataNamesArray.map(n => event.params[n]);
-            const arrayObj = log.data !== '0x' ? defaultAbiCoder.decode(dataTypesArray, log.data) : [];
+            const arrayObj = log.data !== '0x' ? abi_1.defaultAbiCoder.decode(dataTypesArray, log.data) : [];
             arrayObj.forEach((val, i) => {
                 const t = dataTypesArray[i];
                 res[dataNamesArray[i]] = decodeValue(val, t);
@@ -292,7 +303,7 @@ export default class Chain {
             indexedNames.forEach((n, i) => {
                 const rawVal = log.topics[i + 1];
                 const t = event.params[n];
-                const [v] = defaultAbiCoder.decode([t], rawVal);
+                const [v] = abi_1.defaultAbiCoder.decode([t], rawVal);
                 res[n] = decodeValue(v, t);
             });
             return {
@@ -332,3 +343,4 @@ export default class Chain {
         return new TxHash(hash);
     }
 }
+exports.default = Chain;
