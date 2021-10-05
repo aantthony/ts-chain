@@ -8,7 +8,7 @@ const idna_uts46_hx_1 = __importDefault(require("idna-uts46-hx"));
 const js_sha3_1 = require("js-sha3");
 const _1 = require("./");
 // https://github.com/ensdomains/reverse-records
-const REVERSE_RECORDS_MAINNET = new _1.Address('0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C');
+const REVERSE_RECORDS_MAINNET = '0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C';
 const getNames = _1.chainMethod('getNames', { addresses: _1.T.addressArray }, { r: _1.T.stringArray });
 function normalize(name) {
     return idna_uts46_hx_1.default.toAscii(name, {

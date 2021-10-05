@@ -1,35 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyTypedDataV4 = exports.chainMethod = exports.EventType = exports.EventFilter = exports.CallData = exports.T = exports.BlockHash = exports.TxHash = exports.Address = void 0;
+exports.verifyTypedDataV4 = exports.chainMethod = exports.EventType = exports.EventFilter = exports.CallData = exports.T = exports.Address = void 0;
 const abi_1 = require("@ethersproject/abi");
 const wallet_1 = require("@ethersproject/wallet");
+const address_1 = require("@ethersproject/address");
 const bytes_1 = require("@ethersproject/bytes");
 const js_sha3_1 = require("js-sha3");
-class Address {
-    constructor(string) {
-        this.string = string;
-    }
-    /**
-     * Returns the commonly used substring of the address.
-     * @returns 0x1234...ABCD
-     */
-    short() {
-        return this.string.substring(0, 6) + '...' + this.string.substring(36);
-    }
+function Address(hexString) {
+    return address_1.getAddress(hexString);
 }
 exports.Address = Address;
-class TxHash {
-    constructor(txHash) {
-        this.txHash = txHash;
-    }
-}
-exports.TxHash = TxHash;
-class BlockHash {
-    constructor(blockHash) {
-        this.blockHash = blockHash;
-    }
-}
-exports.BlockHash = BlockHash;
 exports.T = {
     address: 'address',
     addressArray: 'address[]',
@@ -51,9 +31,9 @@ exports.T = {
 const Decoder = {
     uint(val) { return BigInt(val); },
     string(val) { return val; },
-    address(val) { return new Address(val); },
+    address(val) { return Address(val); },
     'uint256[]'(val) { return val.map(v => (BigInt(v))); },
-    'address[]'(val) { return val.map(v => new Address(v)); },
+    'address[]'(val) { return val.map(v => Address(v)); },
     'string[]'(val) { return val; },
     uint8(val) { return BigInt(val); },
     uint16(val) { return BigInt(val); },
@@ -103,9 +83,6 @@ function assertString(val, forField) {
 function encode(value, t) {
     if (Array.isArray(value))
         return value.map(e => encode(e, '?'));
-    if (value instanceof Address) {
-        return value.string;
-    }
     return value;
 }
 function encodeArgData(argTypes, arg) {
@@ -174,12 +151,8 @@ function decodeObject(returnTypeObject, dataString) {
 }
 ;
 function toJson(obj) {
-    if (obj instanceof Address)
-        return obj.string;
-    if (obj instanceof TxHash)
-        return obj.txHash;
     if (typeof obj === 'bigint')
-        return '0x' + obj.toString(16);
+        return `0x${obj.toString(16)}`;
     if (Array.isArray(obj))
         return obj.map(toJson);
     if (typeof obj === 'object') {
@@ -201,9 +174,9 @@ function verifyTypedDataV4(domain, types, value, signature) {
         name: domain.name,
         version: domain.version,
         chainId: domain.chainId,
-        verifyingContract: domain.verifyingContract.string,
+        verifyingContract: domain.verifyingContract,
     }, types, value, signature);
-    return new Address(addr);
+    return addr;
 }
 exports.verifyTypedDataV4 = verifyTypedDataV4;
 class Chain {
@@ -241,12 +214,7 @@ class Chain {
             { name: 'verifyingContract', type: 'address' },
         ];
         const req = {
-            domain: {
-                name: domain.name,
-                version: domain.version,
-                chainId: domain.chainId,
-                verifyingContract: domain.verifyingContract.string,
-            },
+            domain,
             types: {
                 EIP712Domain,
                 ...types,
@@ -255,7 +223,7 @@ class Chain {
             primaryType,
         };
         return this.rpc('eth_signTypedData_v4', [
-            account.string,
+            account,
             JSON.stringify(req),
         ]);
     }
@@ -264,16 +232,15 @@ class Chain {
         return BigInt(s);
     }
     async getAccounts() {
-        const strings = await this.rpc('eth_accounts', []);
-        return strings.map(s => new Address(s));
+        return this.rpc('eth_accounts', []);
     }
     async getBalance(accounts) {
-        const resData = await this.rpc('eth_getBalance', [...accounts.map(a => a.string), 'latest']);
+        const resData = await this.rpc('eth_getBalance', [...accounts, 'latest']);
         return BigInt(resData);
     }
     async getTransaction(logEntry) {
         return this.rpc('eth_getTransactionByBlockHashAndIndex', [
-            logEntry.blockHash.blockHash,
+            logEntry.blockHash,
             logEntry.txIndex,
         ]);
     }
@@ -282,7 +249,7 @@ class Chain {
             {
                 fromBlock: filter.fromBlock,
                 toBlock: filter.toBlock,
-                address: filter.address ? filter.address.string : undefined,
+                address: filter.address,
                 topics: event.topics,
             },
         ]);
@@ -307,40 +274,32 @@ class Chain {
                 res[n] = decodeValue(v, t);
             });
             return {
-                address: new Address(log.address),
-                blockHash: new BlockHash(log.blockHash),
+                address: log.address,
+                blockHash: log.blockHash,
                 blockNumber: BigInt(log.blockNumber),
-                tx: new TxHash(log.transactionHash),
+                tx: log.transactionHash,
                 txIndex: BigInt(log.transactionIndex),
                 params: res,
             };
         });
     }
     async getTransactionReceipt(tx) {
-        if (!tx.txHash)
-            throw new Error('missing');
-        return this.rpc('eth_getTransactionReceipt', [tx.txHash]);
+        return this.rpc('eth_getTransactionReceipt', [tx]);
     }
     async call(to, callData) {
-        const rString = await this.rpc('eth_call', [{ to: to.string, data: callData.data }, 'latest']);
+        const rString = await this.rpc('eth_call', [{ to, data: callData.data }, 'latest']);
         return decodeObject(callData.expectedResultType, rString);
     }
     async transact(to, callData, params) {
-        function enc(n) {
-            if (n === undefined)
-                return undefined;
-            return `0x${n.toString(16)}`;
-        }
         const tx = {
-            from: params.from ? params.from.string : undefined,
-            to: to.string,
-            gas: enc(params.gas),
-            gasPrice: enc(params.gasPrice),
-            value: enc(params.value || 0n),
+            from: params.from,
+            to,
+            gas: params.gas,
+            gasPrice: params.gasPrice,
+            value: params.value || 0n,
             data: callData.data,
         };
-        const hash = await this.rpc('eth_sendTransaction', [tx]);
-        return new TxHash(hash);
+        return this.rpc('eth_sendTransaction', [tx]);
     }
 }
 exports.default = Chain;

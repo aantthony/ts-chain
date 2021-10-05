@@ -3,7 +3,7 @@ import { keccak_256 } from 'js-sha3';
 import Chain, { Address, chainMethod, T } from './';
 
 // https://github.com/ensdomains/reverse-records
-const REVERSE_RECORDS_MAINNET = new Address('0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C');
+const REVERSE_RECORDS_MAINNET = '0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C' as Address;
 
 const getNames = chainMethod('getNames', { addresses: T.addressArray }, { r: T.stringArray });
 

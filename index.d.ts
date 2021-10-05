@@ -1,27 +1,24 @@
-export declare class Address {
-    readonly string: string;
-    constructor(string: string);
-    /**
-     * Returns the commonly used substring of the address.
-     * @returns 0x1234...ABCD
-     */
-    short(): string;
-}
+declare type TypedString<identifier> = string & {
+    readonly __: unique symbol;
+    readonly table: identifier;
+};
+/**
+ * Checksummed address.
+ *
+ * All Addresses used and returned by ts-chain are checksummed. Therefore, it is safe to use a simple equality check.
+ * To convert a string to an Address, use Address(str) which will ensure it is checksummed.
+ */
+export declare type Address = TypedString<'Address'>;
+export declare type TxHash = TypedString<'Transaction'>;
+export declare type BlockHash = TypedString<'BlockHash'>;
+export declare type BlockNumber = bigint;
+export declare function Address(hexString: string): Address;
 export interface EIP712TypedDataDomain {
     name: string;
     version: string;
     chainId: number;
     verifyingContract: Address;
 }
-export declare class TxHash {
-    readonly txHash: string;
-    constructor(txHash: string);
-}
-export declare class BlockHash {
-    readonly blockHash: string;
-    constructor(blockHash: string);
-}
-export declare type BlockNumber = bigint;
 export declare const T: {
     address: "address";
     addressArray: "address[]";

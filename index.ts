@@ -1,18 +1,28 @@
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { verifyTypedData } from '@ethersproject/wallet';
+import { getAddress } from '@ethersproject/address';
 import { hexConcat } from '@ethersproject/bytes';
 import { keccak_256 } from 'js-sha3';
 
-export class Address {
-  constructor(public readonly string: string) {}
+type TypedString<identifier> = string & {
+  readonly __: unique symbol;
+  readonly table: identifier;
+}
 
-  /**
-   * Returns the commonly used substring of the address.
-   * @returns 0x1234...ABCD
-   */
-  short() {
-    return this.string.substring(0, 6) + '...' + this.string.substring(36);
-  }
+/**
+ * Checksummed address.
+ * 
+ * All Addresses used and returned by ts-chain are checksummed. Therefore, it is safe to use a simple equality check.
+ * To convert a string to an Address, use Address(str) which will ensure it is checksummed.
+ */
+export type Address = TypedString<'Address'>;
+
+export type TxHash = TypedString<'Transaction'>;
+export type BlockHash = TypedString<'BlockHash'>;
+export type BlockNumber = bigint;
+
+export function Address(hexString: string) {
+  return getAddress(hexString) as Address;
 }
 
 export interface EIP712TypedDataDomain {
@@ -21,16 +31,6 @@ export interface EIP712TypedDataDomain {
   chainId: number;
   verifyingContract: Address;
 }
-
-export class TxHash {
-  constructor(public readonly txHash: string) {}
-}
-
-export class BlockHash {
-  constructor(public readonly blockHash: string) {}
-}
-
-export type BlockNumber = bigint;
 
 export const T = {
   address: 'address' as 'address',
@@ -54,9 +54,9 @@ export const T = {
 const Decoder = {
   uint(val: string): bigint { return BigInt(val); },
   string(val: string): string { return val; },
-  address(val: string): Address { return new Address(val); },
+  address(val: string): Address { return Address(val); },
   'uint256[]'(val: string[]): bigint[] { return val.map(v => (BigInt(v))); },
-  'address[]'(val: string[]): Address[] { return val.map(v => new Address(v)); },
+  'address[]'(val: string[]): Address[] { return val.map(v => Address(v)); },
   'string[]'(val: string[]): string[] { return val; },
   uint8(val: string): bigint { return BigInt(val); },
   uint16(val: string): bigint { return BigInt(val); },
@@ -109,9 +109,6 @@ function assertString(val: unknown, forField: string): string {
 
 function encode(value: any, t: string): any {
   if (Array.isArray(value)) return value.map(e => encode(e, '?'));
-  if (value instanceof Address) {
-    return value.string;
-  }
   return value;
 }
 
@@ -256,9 +253,7 @@ export interface RawTransactionReceipt {
 };
 
 function toJson(obj: any): any {
-  if (obj instanceof Address) return obj.string;
-  if (obj instanceof TxHash) return obj.txHash;
-  if (typeof obj === 'bigint') return '0x' + obj.toString(16);
+  if (typeof obj === 'bigint') return `0x${obj.toString(16)}`;
   if (Array.isArray(obj)) return obj.map(toJson);
   if (typeof obj === 'object') {
     const res: any = {};
@@ -282,9 +277,9 @@ export function verifyTypedDataV4(domain: EIP712TypedDataDomain, types: any, val
     name: domain.name,
     version: domain.version,
     chainId: domain.chainId,
-    verifyingContract: domain.verifyingContract.string,
+    verifyingContract: domain.verifyingContract,
   }, types, value, signature);
-  return new Address(addr);
+  return addr as Address;
 }
 
 export default class Chain {
@@ -331,12 +326,7 @@ export default class Chain {
     ];
 
     const req = {
-      domain: {
-        name: domain.name,
-        version: domain.version,
-        chainId: domain.chainId,
-        verifyingContract: domain.verifyingContract.string,
-      },
+      domain,
       types: {
         EIP712Domain,
         ...types,
@@ -346,7 +336,7 @@ export default class Chain {
     };
 
     return this.rpc('eth_signTypedData_v4', [
-      account.string,
+      account,
       JSON.stringify(req),
     ]);
   }
@@ -357,12 +347,11 @@ export default class Chain {
   }
 
   async getAccounts(): Promise<Address[]> {
-    const strings: string[] = await this.rpc('eth_accounts', []);
-    return strings.map(s => new Address(s));
+    return this.rpc('eth_accounts', []);
   }
 
   async getBalance(accounts: Address[]): Promise<bigint> {
-    const resData: string = await this.rpc('eth_getBalance', [...accounts.map(a => a.string), 'latest']);
+    const resData: string = await this.rpc('eth_getBalance', [...accounts, 'latest']);
     return BigInt(resData);
   }
 
@@ -371,7 +360,7 @@ export default class Chain {
     txIndex: string;
   }) {
     return this.rpc('eth_getTransactionByBlockHashAndIndex', [
-      logEntry.blockHash.blockHash,
+      logEntry.blockHash,
       logEntry.txIndex,
     ]);
   }
@@ -388,7 +377,7 @@ export default class Chain {
       {
         fromBlock: filter.fromBlock,
         toBlock: filter.toBlock,
-        address: filter.address ? filter.address.string : undefined,
+        address: filter.address,
         topics: event.topics,
       },
     ]);
@@ -416,10 +405,10 @@ export default class Chain {
       });
 
       return {
-        address: new Address(log.address),
-        blockHash: new BlockHash(log.blockHash),
+        address: log.address as Address,
+        blockHash: log.blockHash as BlockHash,
         blockNumber: BigInt(log.blockNumber),
-        tx: new TxHash(log.transactionHash),
+        tx: log.transactionHash as TxHash,
         txIndex: BigInt(log.transactionIndex),
         params: res,
       }
@@ -427,29 +416,23 @@ export default class Chain {
   }
   
   async getTransactionReceipt(tx: TxHash): Promise<RawTransactionReceipt | null> {
-    if (!tx.txHash) throw new Error('missing');
-    return this.rpc('eth_getTransactionReceipt', [tx.txHash]);
+    return this.rpc('eth_getTransactionReceipt', [tx]);
   }
 
   async call<ResultType>(to: Address, callData: CallData<ResultType>): Promise<DecodedTuple<ResultType>> {
-    const rString: string = await this.rpc('eth_call', [{ to: to.string, data: callData.data }, 'latest']);
+    const rString: string = await this.rpc('eth_call', [{ to, data: callData.data }, 'latest']);
     return decodeObject(callData.expectedResultType!, rString);
   }
 
   async transact(to: Address, callData: CallData<unknown>, params: { from?: Address, value?: bigint, gas?: bigint, gasPrice?: bigint }): Promise<TxHash> {
-    function enc(n: bigint | undefined): string | undefined {
-      if (n === undefined) return undefined;
-      return `0x${n.toString(16)}`
-    }
     const tx = {
-      from: params.from ? params.from.string : undefined,
-      to: to.string,
-      gas: enc(params.gas),
-      gasPrice: enc(params.gasPrice),
-      value: enc(params.value || 0n),
+      from: params.from,
+      to,
+      gas: params.gas,
+      gasPrice: params.gasPrice,
+      value: params.value || 0n,
       data: callData.data,
     };
-    const hash = await this.rpc('eth_sendTransaction', [tx]);
-    return new TxHash(hash);
+    return this.rpc('eth_sendTransaction', [tx]);
   }
 }
