@@ -1,26 +1,29 @@
-import { EventType } from './';
+import { View, EventType } from './solidity';
 /**
  * https://eips.ethereum.org/EIPS/eip-20
  */
 export declare const ERC20: {
-    name: (arg: import("./").DecodedTuple<{}>) => import("./").CallData<{
+    name: View<import("./abi").DecodedTuple<{}>, import("./abi").DecodedTuple<{
         name: "string";
-    }>;
-    balance: (arg: import("./").DecodedTuple<{
+    }>>;
+    symbol: View<import("./abi").DecodedTuple<{}>, import("./abi").DecodedTuple<{
+        symbol: "string";
+    }>>;
+    balanceOf: View<import("./abi").DecodedTuple<{
         owner: "address";
-    }>) => import("./").CallData<{
+    }>, import("./abi").DecodedTuple<{
         balance: "uint";
-    }>;
-    allowance: (arg: import("./").DecodedTuple<{
+    }>>;
+    allowance: View<import("./abi").DecodedTuple<{
         owner: "address";
         spender: "address";
-    }>) => import("./").CallData<{
+    }>, import("./abi").DecodedTuple<{
         allowance: "uint";
-    }>;
-    approve: (arg: import("./").DecodedTuple<{
+    }>>;
+    approve: View<import("./abi").DecodedTuple<{
         spender: "address";
         value: "uint256";
-    }>) => import("./").CallData<unknown>;
+    }>, void>;
     Transfer: EventType<{
         from: "address";
         to: "address";
@@ -31,12 +34,12 @@ export declare const ERC20: {
  * https://eips.ethereum.org/EIPS/eip-1155
  */
 export declare const ERC1155: {
-    balanceOfBatch: (arg: import("./").DecodedTuple<{
+    balanceOfBatch: View<import("./abi").DecodedTuple<{
         accounts: "address[]";
         ids: "uint256[]";
-    }>) => import("./").CallData<{
+    }>, import("./abi").DecodedTuple<{
         balances: "uint256[]";
-    }>;
+    }>>;
     TransferSingle: EventType<{
         operator: "address";
         from: "address";

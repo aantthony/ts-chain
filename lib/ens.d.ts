@@ -1,4 +1,4 @@
-import Chain, { Address } from './';
+import Chain, { Address } from '.';
 /**
  * Reverse lookup on-chain.
  * @returns list of ENS names, in order

@@ -1,0 +1,46 @@
+import { Address, LogTopic } from '.';
+import { Data } from '.';
+export declare const T: {
+    address: "address";
+    addressArray: "address[]";
+    uint16Array: "uint16[]";
+    uint256Array: "uint256[]";
+    stringArray: "string[]";
+    string: "string";
+    uint8: "uint8";
+    uint16: "uint16";
+    uint32: "uint32";
+    uint64: "uint64";
+    uint128: "uint128";
+    uint256: "uint256";
+    bytes32: "bytes32";
+    uint: "uint";
+    Array<X extends string>(x: X): `${X}[]`;
+};
+declare const Decoder: {
+    uint(val: string): bigint;
+    string(val: string): string;
+    address(val: string): Address;
+    'uint16[]'(val: string[]): bigint[];
+    'uint256[]'(val: string[]): bigint[];
+    'address[]'(val: string[]): Address[];
+    'string[]'(val: string[]): string[];
+    uint8(val: string): bigint;
+    uint16(val: string): bigint;
+    uint32(val: string): bigint;
+    uint64(val: string): bigint;
+    uint128(val: string): bigint;
+    uint256(val: string): bigint;
+    bytes32(val: string): bigint;
+    bool(val: boolean): boolean;
+};
+export declare type AbiType = keyof typeof Decoder;
+export declare type DecodedType<T extends AbiType> = ReturnType<typeof Decoder[T]>;
+export declare type DecodedTuple<TupleType> = {
+    [k in keyof TupleType]: TupleType[k] extends AbiType ? DecodedType<TupleType[k]> : never;
+};
+export declare function abiDecode<T extends AbiType[]>(types: T, data: Data): any[];
+export declare function decodeObject<Spec>(spec: Spec, data: Data): DecodedTuple<Spec>;
+export declare function encodeObject<Spec>(spec: Spec, value: DecodedTuple<Spec>): Data;
+export declare function encodeTopic<T extends AbiType>(t: T, v: DecodedType<T>): LogTopic;
+export {};
