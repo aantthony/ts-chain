@@ -1,6 +1,5 @@
 import { defaultAbiCoder } from '@ethersproject/abi';
-import { Address, LogTopic, TxHash, TxIndex } from '.';
-import { Data } from '.';
+import { Data, Address, LogTopic, TxHash, TxIndex } from './types';
 
 export const T = {
   address: 'address' as 'address',
@@ -9,34 +8,52 @@ export const T = {
   uint256Array: 'uint256[]' as 'uint256[]',
   stringArray: 'string[]' as 'string[]',
   string: 'string' as 'string',
+
   uint8: 'uint8' as 'uint8',
   uint16: 'uint16' as 'uint16',
   uint32: 'uint32' as 'uint32',
+  uint48: 'uint48' as 'uint48',
   uint64: 'uint64' as 'uint64',
   uint128: 'uint128' as 'uint128',
   uint256: 'uint256' as 'uint256',
+
+  int8: 'int8' as 'int8',
+  int16: 'int16' as 'int16',
+  int32: 'int32' as 'int32',
+  int48: 'int48' as 'int48',
+  int64: 'int64' as 'int64',
+  int128: 'int128' as 'int128',
+  int256: 'int256' as 'int256',
+
   bytes32: 'bytes32' as 'bytes32',
-  uint: 'uint' as 'uint',
+
+
+  // Shorthand for uint256
+  uint: 'uint256' as 'uint256',
   Array<X extends string>(x: X): `${X}[]` {
     return `${x}[]`;
   }
 };
 
+function toBigInt(val: string): bigint {
+  return BigInt(val);
+}
+
 const Decoder = {
-  uint(val: string): bigint { return BigInt(val); },
   string(val: string): string { return val; },
   address(val: string): Address { return Address(val); },
   'uint16[]'(val: string[]): bigint[] { return val.map(v => (BigInt(v))); },
   'uint256[]'(val: string[]): bigint[] { return val.map(v => (BigInt(v))); },
   'address[]'(val: string[]): Address[] { return val.map(v => Address(v)); },
   'string[]'(val: string[]): string[] { return val; },
-  uint8(val: string): bigint { return BigInt(val); },
-  uint16(val: string): bigint { return BigInt(val); },
-  uint32(val: string): bigint { return BigInt(val); },
-  uint64(val: string): bigint { return BigInt(val); },
-  uint128(val: string): bigint { return BigInt(val); },
-  uint256(val: string): bigint { return BigInt(val); },
-  bytes32(val: string): bigint { return BigInt(val); },
+  uint8: toBigInt,
+  uint16: toBigInt,
+  uint32: toBigInt,
+  uint48: toBigInt,
+  uint64: toBigInt,
+  uint128: toBigInt,
+  uint256: toBigInt,
+  bytes32: toBigInt,
   bool(val: boolean): boolean {
     if (val === true) return true;
     if (val === false) return false;
@@ -102,7 +119,7 @@ export function encodeObject<Spec>(spec: Spec, value: DecodedTuple<Spec>): Data 
   .forEach(k => {
     const t = (spec as any)[k];
     typesArray.push(t);
-    valuesArray.push((value as any)[k], t);
+    valuesArray.push((value as any)[k]);
   });
 
   return abiEncode(typesArray, valuesArray);

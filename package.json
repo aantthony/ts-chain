@@ -2,8 +2,8 @@
   "name": "ts-chain",
   "version": "0.0.2",
   "description": "Typescript focused Ethereum library",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "type": "module",
   "sideEffects": false,
   "scripts": {

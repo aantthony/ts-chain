@@ -12,13 +12,13 @@ export declare const ERC20: {
     balanceOf: View<import("./abi").DecodedTuple<{
         owner: "address";
     }>, import("./abi").DecodedTuple<{
-        balance: "uint";
+        balance: "uint256";
     }>>;
     allowance: View<import("./abi").DecodedTuple<{
         owner: "address";
         spender: "address";
     }>, import("./abi").DecodedTuple<{
-        allowance: "uint";
+        allowance: "uint256";
     }>>;
     approve: View<import("./abi").DecodedTuple<{
         spender: "address";

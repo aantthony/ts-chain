@@ -1,7 +1,9 @@
 import uts46 from 'idna-uts46-hx';
 import { keccak_256 } from 'js-sha3';
-import Chain, { Address } from '.';
+import { Address } from './types';
 import { View, T } from './solidity';
+
+import Chain from './index';
 
 // https://github.com/ensdomains/reverse-records
 const REVERSE_RECORDS_MAINNET = '0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C' as Address;

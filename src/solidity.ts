@@ -1,6 +1,6 @@
 import { keccak_256 } from 'js-sha3';
 import { abiDecode, AbiType, DecodedTuple, DecodedType, decodeObject, encodeObject, encodeTopic, T } from './abi';
-import { Call, CallData, Data, LogFilter, LogItem, LogTopic } from '.';
+import { Call, CallData, Data, LogFilter, LogItem, LogTopic } from './types';
 
 export { T };
 

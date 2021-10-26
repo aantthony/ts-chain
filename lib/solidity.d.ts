@@ -1,5 +1,5 @@
 import { AbiType, DecodedTuple, DecodedType, T } from './abi';
-import { Call, LogFilter, LogItem, LogTopic } from '.';
+import { Call, LogFilter, LogItem, LogTopic } from './types';
 export { T };
 export declare type SolidityType = AbiType;
 export declare type OrArray<T> = T | T[];
