@@ -47,4 +47,9 @@ export declare const ERC1155: {
         id: "uint256";
         value: "uint256";
     }>;
+    uri: View<import("./abi").DecodedTuple<{
+        _id: "uint256";
+    }>, import("./abi").DecodedTuple<{
+        uri: "string";
+    }>>;
 };
