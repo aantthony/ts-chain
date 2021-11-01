@@ -1,11 +1,14 @@
 import uts46 from 'idna-uts46-hx';
 import { keccak_256 } from 'js-sha3';
-import Chain, { Address, chainMethod, T } from './';
+import { Address } from './types';
+import { View, T } from './solidity';
+
+import Chain from './index';
 
 // https://github.com/ensdomains/reverse-records
 const REVERSE_RECORDS_MAINNET = '0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C' as Address;
 
-const getNames = chainMethod('getNames', { addresses: T.addressArray }, { r: T.stringArray });
+const getNames = View('getNames', { addresses: T.addressArray }, { r: T.stringArray });
 
 function normalize(name: string) {
   return uts46.toAscii(name, {
@@ -23,6 +26,7 @@ export async function reverseEnsLookup(chain: Chain, addresses: Address[]): Prom
   const { r } = await chain.call(REVERSE_RECORDS_MAINNET, getNames({ addresses }));
 
   return r.map(n => {
+    if (!n) return '';
     // Prevent homograph attack
     const safe = normalize(n) === n;
 

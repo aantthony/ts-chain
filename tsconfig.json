@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "ES2020",
     "target": "ES2021",
     "declaration": true,
     "strict": true,
@@ -9,6 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "outDir": "./lib"
   },
-  "exclude": ["dist", "*.d.ts"]
+  "include": ["./src"]
 }
