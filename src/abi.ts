@@ -1,5 +1,5 @@
 import { defaultAbiCoder } from '@ethersproject/abi';
-import { Data, Address, LogTopic, TxHash, TxIndex } from './types';
+import { Data, Address, LogTopic } from './types';
 
 export const T = {
   address: 'address' as 'address',

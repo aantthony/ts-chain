@@ -9,7 +9,9 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "lib": ["es2020"],
+    "sourceMap": true
   },
   "include": ["./src"]
 }
