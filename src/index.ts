@@ -2,9 +2,9 @@ import { T } from './abi';
 import { ERC1155, ERC20 } from './contracts';
 import { EventType, Method, View } from './solidity';
 import { verifyTypedDataV4 } from './typed-verify';
-import { Address, Block, BlockHash, BlockNumber, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
+import { AddEthereumChainParameter, Address, Block, BlockHash, BlockNumber, Call, CallData, ChainId, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
 
-export { Address, Block, BlockHash, BlockNumber, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei };
+export { Address, Block, BlockHash, BlockNumber, ChainId, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei };
 
 export { ERC1155, ERC20 };
 
@@ -33,11 +33,8 @@ function toJson(obj: any): any {
 }
 
 export default class Chain {
-  public readonly id: number;
   constructor(private readonly provider: EIP1193Provider) {
     if (!provider) throw new Error('missing provider in Chain constructor');
-    const c = (provider as any).chainId;
-    this.id = typeof c === 'number' ? c : parseInt(c);
   }
 
   static create(provider: EIP1193Provider) {
@@ -152,5 +149,27 @@ export default class Chain {
       params.data = params.data.data;
     }
     return this.rpc('eth_sendTransaction', [params]);
+  }
+  
+  /**
+   * Returns the currently configured chain ID, a value used in replay-protected transaction signing as introduced by EIP-155.
+   * https://eips.ethereum.org/EIPS/eip-695
+   */
+  async getChainId(): Promise<ChainId> {
+    return this.rpc('eth_chainId', []);
+  }
+
+  /**
+   * https://eips.ethereum.org/EIPS/eip-3085
+   */
+  async addEthereumChain(params: AddEthereumChainParameter) {
+    await this.rpc('wallet_addEthereumChain', [params]);
+  }
+
+  /**
+   * https://eips.ethereum.org/EIPS/eip-3326
+   */
+  async switchEthereumChain(chainId: ChainId) {
+    await this.rpc('wallet_switchEthereumChain', [{ chainId }]);
   }
 }

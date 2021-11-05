@@ -17,6 +17,14 @@ export function Address(hexString: string) {
 
 export type Data = Hex<'Data'>;
 
+export type ChainId = Hex<'ChainId'>;
+export function ChainId(hexStringOrNumber: string | number): ChainId {
+  if (typeof hexStringOrNumber === 'number') {
+    return '0x' + hexStringOrNumber.toString(16) as ChainId;
+  }
+  return hexStringOrNumber.toLowerCase() as ChainId;
+}
+
 export type CallData = Hex<'CallData'>;
 export type TxIndex = Hex<'TransactionIndex'>;
 export type TxHash = Hex<'Transaction'>;
@@ -113,7 +121,7 @@ export interface Call<Result> {
 export interface EIP712TypedDataDomain {
   name: string;
   version: string;
-  chainId: number;
+  chainId: ChainId;
   verifyingContract: Address;
 }
 
@@ -142,3 +150,17 @@ export interface TransactionReceipt {
   status: '0x1';
   effectiveGasPrice: Wei;
 };
+
+
+export interface AddEthereumChainParameter {
+  chainId: ChainId;
+  blockExplorerUrls?: string[];
+  chainName?: string;
+  iconUrls?: string[];
+  nativeCurrency?: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  rpcUrls?: string[];
+}

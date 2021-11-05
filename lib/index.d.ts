@@ -2,14 +2,13 @@ import { T } from './abi';
 import { ERC1155, ERC20 } from './contracts';
 import { EventType, Method, View } from './solidity';
 import { verifyTypedDataV4 } from './typed-verify';
-import { Address, Block, BlockHash, BlockNumber, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
-export { Address, Block, BlockHash, BlockNumber, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei };
+import { AddEthereumChainParameter, Address, Block, BlockHash, BlockNumber, Call, CallData, ChainId, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
+export { Address, Block, BlockHash, BlockNumber, ChainId, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei };
 export { ERC1155, ERC20 };
 export { verifyTypedDataV4 };
 export { Method, View, EventType, T };
 export default class Chain {
     private readonly provider;
-    readonly id: number;
     constructor(provider: EIP1193Provider);
     static create(provider: EIP1193Provider): Chain;
     static fromSendProvider(provider: {
@@ -42,4 +41,17 @@ export default class Chain {
         gas?: Gas;
         gasPrice?: InputWei;
     }): Promise<TxHash>;
+    /**
+     * Returns the currently configured chain ID, a value used in replay-protected transaction signing as introduced by EIP-155.
+     * https://eips.ethereum.org/EIPS/eip-695
+     */
+    getChainId(): Promise<ChainId>;
+    /**
+     * https://eips.ethereum.org/EIPS/eip-3085
+     */
+    addEthereumChain(params: AddEthereumChainParameter): Promise<void>;
+    /**
+     * https://eips.ethereum.org/EIPS/eip-3326
+     */
+    switchEthereumChain(chainId: ChainId): Promise<void>;
 }

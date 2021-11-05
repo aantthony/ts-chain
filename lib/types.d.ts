@@ -11,6 +11,8 @@ declare type Hex<identifier> = `0x${string}` & {
 export declare type Address = Hex<'Address'>;
 export declare function Address(hexString: string): Address;
 export declare type Data = Hex<'Data'>;
+export declare type ChainId = Hex<'ChainId'>;
+export declare function ChainId(hexStringOrNumber: string | number): ChainId;
 export declare type CallData = Hex<'CallData'>;
 export declare type TxIndex = Hex<'TransactionIndex'>;
 export declare type TxHash = Hex<'Transaction'>;
@@ -93,7 +95,7 @@ export interface Call<Result> {
 export interface EIP712TypedDataDomain {
     name: string;
     version: string;
-    chainId: number;
+    chainId: ChainId;
     verifyingContract: Address;
 }
 interface RequestArguments {
@@ -118,5 +120,17 @@ export interface TransactionReceipt {
     type: '0x1' | '0x2';
     status: '0x1';
     effectiveGasPrice: Wei;
+}
+export interface AddEthereumChainParameter {
+    chainId: ChainId;
+    blockExplorerUrls?: string[];
+    chainName?: string;
+    iconUrls?: string[];
+    nativeCurrency?: {
+        name: string;
+        symbol: string;
+        decimals: number;
+    };
+    rpcUrls?: string[];
 }
 export {};
