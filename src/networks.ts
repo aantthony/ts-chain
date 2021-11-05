@@ -3,7 +3,7 @@ import { AddEthereumChainParameter, ChainId } from './types';
 export const optimisticKovan: AddEthereumChainParameter = {
   chainId: '0x45' as ChainId,
   chainName: 'Optimistic Kovan',
-  blockExplorerUrls: ['https://kovan-explorer.optimism.io/'],
+  blockExplorerUrls: ['https://kovan-optimistic.etherscan.io/'],
   rpcUrls: ['https://kovan.optimism.io'],
 };
 
@@ -16,5 +16,5 @@ export const optimism: AddEthereumChainParameter = {
     symbol: 'ETH',
     decimals: 18
   },
-  blockExplorerUrls: ['https://explorer.optimism.io/']
+  blockExplorerUrls: ['https://optimistic.etherscan.io/']
 };
