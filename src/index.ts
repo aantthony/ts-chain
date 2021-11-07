@@ -51,13 +51,9 @@ export default class Chain {
       on(eventName, listener) {
         return this;
       },
-      off() {
-        
-      },
-      once() {
-
-      },
-      removeListener() {}
+      removeListener() {
+        return this;
+      }
     });
   }
 
