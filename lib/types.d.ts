@@ -98,13 +98,6 @@ export interface EIP712TypedDataDomain {
     chainId: ChainId;
     verifyingContract: Address;
 }
-interface RequestArguments {
-    readonly method: string;
-    readonly params?: readonly unknown[] | object;
-}
-export interface EIP1193Provider {
-    request(args: RequestArguments): Promise<unknown>;
-}
 export interface TransactionReceipt {
     transactionHash: TxHash;
     transactionIndex: TxIndex;

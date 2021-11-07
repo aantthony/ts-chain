@@ -2,9 +2,11 @@ import { T } from './abi';
 import { ERC1155, ERC20 } from './contracts';
 import { EventType, Method, View } from './solidity';
 import { verifyTypedDataV4 } from './typed-verify';
-import { AddEthereumChainParameter, Address, Block, BlockHash, BlockNumber, Call, CallData, ChainId, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
+import { EIP1193Provider } from './eip1193';
 
-export { Address, Block, BlockHash, BlockNumber, ChainId, Call, CallData, EIP1193Provider, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei };
+import { AddEthereumChainParameter, Address, Block, BlockHash, BlockNumber, Call, CallData, ChainId, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
+
+export { EIP1193Provider, Address, Block, BlockHash, BlockNumber, ChainId, Call, CallData, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei };
 
 export { ERC1155, ERC20 };
 
@@ -45,7 +47,17 @@ export default class Chain {
     return new Chain({
       async request({method, params}) {
         return provider.send(method, params as any);
-      }
+      },
+      on(eventName, listener) {
+        return this;
+      },
+      off() {
+        
+      },
+      once() {
+
+      },
+      removeListener() {}
     });
   }
 

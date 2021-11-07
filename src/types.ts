@@ -125,15 +125,6 @@ export interface EIP712TypedDataDomain {
   verifyingContract: Address;
 }
 
-interface RequestArguments {
-  readonly method: string;
-  readonly params?: readonly unknown[] | object;
-}
-
-export interface EIP1193Provider {
-  request(args: RequestArguments): Promise<unknown>;
-}
-
 export interface TransactionReceipt {
   transactionHash: TxHash,
   transactionIndex: TxIndex,
@@ -150,7 +141,6 @@ export interface TransactionReceipt {
   status: '0x1';
   effectiveGasPrice: Wei;
 };
-
 
 export interface AddEthereumChainParameter {
   chainId: ChainId;
