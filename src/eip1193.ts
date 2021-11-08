@@ -21,14 +21,15 @@ export interface ProviderRpcError extends Error {
   data?: unknown;
 }
 export interface SimpleEventEmitter {
-  on(event: string, listener: any): this;
-  removeListener(event: string, listener: any): this;
+  on(event: string, listener: any): this | unknown;
+  removeListener(event: string, listener: any): this | unknown;
 }
+
 export interface EIP1193Provider extends SimpleEventEmitter {
   request(args: RequestArguments): Promise<unknown>;
-  on(eventName: 'connect', listener: (connectInfo: ProviderConnectInfo) => void): this;
-  on(eventName: 'disconnect', listener: (error: ProviderRpcError) => void): this;
-  on(eventName: 'chainChanged', listener: (chainId: string) => void): this;
-  on(eventName: 'accountsChanged', listener: (accounts: string[]) => void): this;
-  on(eventName: 'message', listener: (message: ProviderMessage) => void): this;
+  on(eventName: 'connect', listener: (connectInfo: ProviderConnectInfo) => void): this | unknown;
+  on(eventName: 'disconnect', listener: (error: ProviderRpcError) => void): this | unknown;
+  on(eventName: 'chainChanged', listener: (chainId: string) => void): this | unknown;
+  on(eventName: 'accountsChanged', listener: (accounts: string[]) => void): this | unknown;
+  on(eventName: 'message', listener: (message: ProviderMessage) => void): this | unknown;
 }

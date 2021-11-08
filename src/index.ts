@@ -2,7 +2,7 @@ import { T } from './abi';
 import { ERC1155, ERC20 } from './contracts';
 import { EventType, Method, View } from './solidity';
 import { verifyTypedDataV4 } from './typed-verify';
-import { EIP1193Provider } from './eip1193';
+import { EIP1193Provider, ProviderRpcError } from './eip1193';
 
 import { AddEthereumChainParameter, Address, Block, BlockHash, BlockNumber, Call, CallData, ChainId, EIP712TypedDataDomain, Gas, InputBlockNumber, InputWei, LogFilter, LogItem, Transaction, TransactionReceipt, TxHash, TxIndex, Wei } from './types';
 
@@ -13,6 +13,12 @@ export { ERC1155, ERC20 };
 export { verifyTypedDataV4 };
 
 export { Method, View, EventType, T };
+
+class ChainProviderRpcError extends Error implements ProviderRpcError {
+  constructor(message: string, public readonly code: number, public readonly data?: unknown) {
+    super(message);
+  }
+}
 
 function toJson(obj: any): any {
   if (typeof obj === 'bigint') return `0x${obj.toString(16)}`;
@@ -61,7 +67,15 @@ export default class Chain {
     if (params.length === undefined) throw new Error('invalid params array');
     // console.info(`ETH: ${method}(${params.map(e => JSON.stringify(e)).join(', ')})`);
     const json = toJson(params);
-    const res = await this.provider.request({ method, params: json });
+    const res = await this.provider.request({ method, params: json })
+    .catch(err => {
+      // Some providers (e.g. @walletconnect/ethereum-provider)
+      // emit strings for errors instead of EIP-1193 errors
+      if (typeof err === 'string') throw new ChainProviderRpcError(err, -1);
+
+      // Otherwise just assume it is correct
+      throw err as ProviderRpcError;
+    });
     // console.info(`ETH: ${method}(${params.map(e => JSON.stringify(e)).join(', ')})`, `${JSON.stringify(res)}`);
     return res;
   }
