@@ -9,6 +9,8 @@ export const T = {
   stringArray: 'string[]' as 'string[]',
   string: 'string' as 'string',
 
+  bool: 'bool' as 'bool',
+
   uint8: 'uint8' as 'uint8',
   uint16: 'uint16' as 'uint16',
   uint32: 'uint32' as 'uint32',

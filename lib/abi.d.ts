@@ -6,6 +6,7 @@ export declare const T: {
     uint256Array: "uint256[]";
     stringArray: "string[]";
     string: "string";
+    bool: "bool";
     uint8: "uint8";
     uint16: "uint16";
     uint32: "uint32";

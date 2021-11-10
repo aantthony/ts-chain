@@ -65,8 +65,8 @@ export default class Chain {
 
   async rpc(method: string, params: readonly unknown[]): Promise<any> {
     if (params.length === undefined) throw new Error('invalid params array');
-    // console.info(`ETH: ${method}(${params.map(e => JSON.stringify(e)).join(', ')})`);
     const json = toJson(params);
+    // console.info(`ETH: ${method}(${JSON.stringify(json)})`);
     const res = await this.provider.request({ method, params: json })
     .catch(err => {
       // Some providers (e.g. @walletconnect/ethereum-provider)
@@ -76,7 +76,7 @@ export default class Chain {
       // Otherwise just assume it is correct
       throw err as ProviderRpcError;
     });
-    // console.info(`ETH: ${method}(${params.map(e => JSON.stringify(e)).join(', ')})`, `${JSON.stringify(res)}`);
+    // console.info(`ETH: ${method}(${JSON.stringify(json)}): ${JSON.stringify(res)}`);
     return res;
   }
 
