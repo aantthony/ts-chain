@@ -26,11 +26,17 @@ export declare const T: {
     Array<X extends string>(x: X): `${X}[]`;
 };
 declare function toBigInt(val: string): bigint;
+declare function decodeIntArray(val: string[]): bigint[];
 declare const Decoder: {
     string(val: string): string;
     address(val: string): Address;
-    'uint16[]'(val: string[]): bigint[];
-    'uint256[]'(val: string[]): bigint[];
+    'uint8[]': typeof decodeIntArray;
+    'uint16[]': typeof decodeIntArray;
+    'uint32[]': typeof decodeIntArray;
+    'uint48[]': typeof decodeIntArray;
+    'uint64[]': typeof decodeIntArray;
+    'uint128[]': typeof decodeIntArray;
+    'uint256[]': typeof decodeIntArray;
     'address[]'(val: string[]): Address[];
     'string[]'(val: string[]): string[];
     uint8: typeof toBigInt;

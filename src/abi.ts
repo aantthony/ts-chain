@@ -29,7 +29,6 @@ export const T = {
 
   bytes32: 'bytes32' as 'bytes32',
 
-
   // Shorthand for uint256
   uint: 'uint256' as 'uint256',
   Array<X extends string>(x: X): `${X}[]` {
@@ -41,11 +40,20 @@ function toBigInt(val: string): bigint {
   return BigInt(val);
 }
 
+function decodeIntArray(val: string[]): bigint[] {
+  return val.map(v => (BigInt(v)));;
+}
+
 const Decoder = {
   string(val: string): string { return val; },
   address(val: string): Address { return Address(val); },
-  'uint16[]'(val: string[]): bigint[] { return val.map(v => (BigInt(v))); },
-  'uint256[]'(val: string[]): bigint[] { return val.map(v => (BigInt(v))); },
+  'uint8[]': decodeIntArray,
+  'uint16[]': decodeIntArray,
+  'uint32[]': decodeIntArray,
+  'uint48[]': decodeIntArray,
+  'uint64[]': decodeIntArray,
+  'uint128[]': decodeIntArray,
+  'uint256[]': decodeIntArray,
   'address[]'(val: string[]): Address[] { return val.map(v => Address(v)); },
   'string[]'(val: string[]): string[] { return val; },
   uint8: toBigInt,
